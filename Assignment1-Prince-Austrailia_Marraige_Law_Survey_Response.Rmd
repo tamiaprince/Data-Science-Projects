@@ -1,0 +1,154 @@
+#Austrailian_Marriage_Law_Response_Only
+---
+title: "Assignment1-Prince-Austrailia Marriage Law Survey Response"
+
+author:Tamia Prince
+
+date: 11/March/2021
+
+output: html_document
+
+---
+
+
+**Data Source**
+
+We're going to examine Austrailia's Marriage Law Postal 
+Survey Response from the 2017 Austrailian Bureau of Statistics.
+_Why?_
+
+**Background**
+
+* Starting in 2004 to 2017 there were 22 inefficacious attempts 
+to legalize same sex marraige in Federal Parliment. 
+
+* In 2017 this survey was conducted and did not need to be approved 
+by parliment, which meant those who wanted there vote to be heard 
+had a fighting chance.
+
+* This survey was upheld by the high court.
+
+* The results of this survey determined whether the same sex marriage 
+bill was passed. 
+
+* The results conclude that 61.6% of respondents said yes on the 
+survey so the same sex marriage bill was passed.
+
+**Characteristics**
+
+_DataType_: Survey reponse records (In numbers and Percentages)
+
+_Columns_: Yes, No, Response clear, Response not clear(a),
+Non-responding, Total 
+
+_Rows_: Places in Austrailia
+
+**Variables**
+
+'Yes' and 'No' are used for variables in terms of their 
+percentage and response count. 
+
+_(Below is the data in it's raw form)_
+
+```{r}
+rm(list = ls())
+#install.packages("readxl")
+library("readxl")
+dataframe <- read_excel("/Users/Tamia/C:/CIS8392/Austrailian_Marriage_Law_Postal_Survey_2017_-_Response_final.xls")
+dataframe
+
+```
+**Why is the data not tidy?**
+
+The data is not tidy because it has empty NA values, 
+and spaces between columns. The merged columns cause 
+problems with interpretation, and there is a link and 
+extra text around the data as well. Columns needed renaming 
+to help define what the values mean and to better see which 
+each title without the extra information at the top and bottom. 
+
+```{r}
+#install.packages("testthat")
+#install.packages("assertive")
+#install.packages("rlang")
+#install.packages("dplyr")
+#install.packages("tidyr")
+#install.packages("readxl")
+library(readxl)
+library(tidyverse)
+library(rvest)
+
+path = "Austrailian_Marriage_Law_Postal_Survey_2017_-_Response_final.xls"
+response_counts <-
+  read_excel(
+    path,
+    range = "A8:P20",
+    col_name = c( "Place",
+                  "Yes",
+                  "Yes_percentage",
+                  "No",
+                  "No_percentage",
+                  "Total_Response",
+                  "Total_Response_percentage",
+                  "blank",
+                  "Response_clear",
+                  "Response_clear_percentage",
+                  "Response_not_clear(b)",
+                  "Response_not_clear(b)_percentage",
+                  "Non-responding",
+                  "Non-responding_percentage",
+                  "Eligible_Total",
+                  "Eligible_Total_percentage")
+  ) %>%
+  select(-blank) %>%
+  drop_na() %>%
+  mutate(Place = gsub("\\([a-z]\\)","",Place)) %>%
+  filter(!grepl("Total", Place))
+
+knitr::kable(response_counts)
+
+```
+**Why is the data now tidy?**
+
+The data is now tidy because The titles of the columns are 
+rightfully assigned. There is no extra text or footnotes in 
+the data. The column and row titles are clearly defined. The 
+empty column in between the data is gone so it looks like one 
+whole dataset together. The merged cells have been split to 
+reflect the needed titles of the data. I also got rid of the 
+lower case letter using the mutate function. Lastly I only 
+kept the rows that showed survey values for each Place, so 
+there is only valuable data in the dataset. 
+
+```{r dataframe}
+library(ggplot2)
+ggplot(response_counts, aes(x=No, y=Yes)) + geom_point() + geom_smooth()
+```
+**Line Graph GGPLOT**
+
+
+This plot show a line graph in the a direct relationship 
+between the number of yes and no responses. 
+The pattern in this plot is as the Yes votes increase, 
+so do the No votes.
+It is meaningful because it shows that there was an increasing 
+number of votes casted for both choices. 
+
+```{r}
+#install.packages("ggplot2")
+
+library(ggplot2)
+bar = ggplot(response_counts, mapping = 
+               aes(x =No, y =Yes)) + geom_boxplot() + coord_flip()
+bar
+
+```
+**Bar Graph GGPLOT**
+
+
+This plot shows a bar chart for the repondant's answers.
+The pattern in this plot shows that slighty more 
+people voted 'Yes' than 'No'. 
+It is meaningful because it shows that the deviation of 
+the 'Yes' votes from the No votes is prevalent but not significant. 
+

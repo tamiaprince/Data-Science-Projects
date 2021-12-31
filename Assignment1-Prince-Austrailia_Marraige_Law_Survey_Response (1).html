@@ -1,0 +1,404 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html><head></head><body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div>
+
+
+
+
+</div>
+
+
+<div class="section level2">
+<h2>#Austrailian_Marriage_Law_Response_Only</h2>
+<p>title: “Assignment1-Prince-Austrailia Marriage Law Survey Response”</p>
+<p>author:Tamia Prince</p>
+<p>date: 11/March/2021</p>
+<p>output: html_document</p>
+<hr/>
+<p><strong>Data Source</strong></p>
+<p>We’re going to examine Austrailia’s Marriage Law Postal Survey Response from the 2017 Austrailian Bureau of Statistics. <em>Why?</em></p>
+<p><strong>Background</strong></p>
+<ul>
+<li><p>Starting in 2004 to 2017 there were 22 inefficacious attempts to legalize same sex marraige in Federal Parliment.</p></li>
+<li><p>In 2017 this survey was conducted and did not need to be approved by parliment, which meant those who wanted there vote to be heard had a fighting chance.</p></li>
+<li><p>This survey was upheld by the high court.</p></li>
+<li><p>The results of this survey determined whether the same sex marriage bill was passed.</p></li>
+<li><p>The results conclude that 61.6% of respondents said yes on the survey so the same sex marriage bill was passed.</p></li>
+</ul>
+<p><strong>Characteristics</strong></p>
+<p><em>DataType</em>: Survey reponse records (In numbers and Percentages)</p>
+<p><em>Columns</em>: Yes, No, Response clear, Response not clear(a), Non-responding, Total</p>
+<p><em>Rows</em>: Places in Austrailia</p>
+<p><strong>Variables</strong></p>
+<p>‘Yes’ and ‘No’ are used for variables in terms of their percentage and response count.</p>
+<p><em>(Below is the data in it’s raw form)</em></p>
+<pre class="r"><code>rm(list = ls())
+#install.packages(&quot;readxl&quot;)
+library(&quot;readxl&quot;)
+dataframe &lt;- read_excel(&quot;/Users/Tamia/C:/CIS8392/Austrailian_Marriage_Law_Postal_Survey_2017_-_Response_final.xls&quot;)</code></pre>
+<pre><code>## New names:
+## * `` -&gt; ...2
+## * `` -&gt; ...3
+## * `` -&gt; ...4
+## * `` -&gt; ...5
+## * `` -&gt; ...6
+## * ...</code></pre>
+<pre class="r"><code>dataframe</code></pre>
+<pre><code>## # A tibble: 21 x 16
+##    `Australian Bure… ...2  ...3  ...4  ...5  ...6  ...7  ...8  ...9  ...10 ...11
+##    &lt;chr&gt;             &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+##  1 1800.0 Australia… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  NA    &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+##  2 Released on 15 N… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  NA    &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+##  3 Table 1 Response… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  NA    &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+##  4 &lt;NA&gt;              Resp… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  NA    Elig… &lt;NA&gt;  &lt;NA&gt; 
+##  5 &lt;NA&gt;              Yes   &lt;NA&gt;  No    &lt;NA&gt;  Total &lt;NA&gt;  NA    Resp… &lt;NA&gt;  Resp…
+##  6 &lt;NA&gt;              no.   %     no.   %     no.   %     NA    no.   %     no.  
+##  7 New South Wales   2374… 57.7… 1736… 42.2… 4111… 100   NA    4111… 79.2… 11036
+##  8 Victoria          2145… 64.9… 1161… 35.1… 3306… 100   NA    3306… 81.4… 11028
+##  9 Queensland        1487… 60.7… 9610… 39.2… 2448… 100   NA    2448… 77.7… 7088 
+## 10 South Australia   5925… 62.5  3562… 37.5  9487… 100   NA    9487… 79.5  2778 
+## # … with 11 more rows, and 5 more variables: ...12 &lt;chr&gt;, ...13 &lt;chr&gt;,
+## #   ...14 &lt;chr&gt;, ...15 &lt;chr&gt;, ...16 &lt;chr&gt;</code></pre>
+<p><strong>Why is the data not tidy?</strong></p>
+<p>The data is not tidy because it has empty NA values, and spaces between columns. The merged columns cause problems with interpretation, and there is a link and extra text around the data as well. Columns needed renaming to help define what the values mean and to better see which each title without the extra information at the top and bottom.</p>
+<pre class="r"><code>#install.packages(&quot;testthat&quot;)
+#install.packages(&quot;assertive&quot;)
+#install.packages(&quot;rlang&quot;)
+#install.packages(&quot;dplyr&quot;)
+#install.packages(&quot;tidyr&quot;)
+#install.packages(&quot;readxl&quot;)
+library(readxl)
+library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ✓ ggplot2 3.3.3     ✓ purrr   0.3.4
+## ✓ tibble  3.1.0     ✓ dplyr   1.0.5
+## ✓ tidyr   1.1.3     ✓ stringr 1.4.0
+## ✓ readr   1.4.0     ✓ forcats 0.5.1</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(rvest)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;rvest&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:readr&#39;:
+## 
+##     guess_encoding</code></pre>
+<pre class="r"><code>path = &quot;Austrailian_Marriage_Law_Postal_Survey_2017_-_Response_final.xls&quot;
+response_counts &lt;-
+  read_excel(
+    path,
+    range = &quot;A8:P20&quot;,
+    col_name = c( &quot;Place&quot;,
+                  &quot;Yes&quot;,
+                  &quot;Yes_percentage&quot;,
+                  &quot;No&quot;,
+                  &quot;No_percentage&quot;,
+                  &quot;Total_Response&quot;,
+                  &quot;Total_Response_percentage&quot;,
+                  &quot;blank&quot;,
+                  &quot;Response_clear&quot;,
+                  &quot;Response_clear_percentage&quot;,
+                  &quot;Response_not_clear(b)&quot;,
+                  &quot;Response_not_clear(b)_percentage&quot;,
+                  &quot;Non-responding&quot;,
+                  &quot;Non-responding_percentage&quot;,
+                  &quot;Eligible_Total&quot;,
+                  &quot;Eligible_Total_percentage&quot;)
+  ) %&gt;%
+  select(-blank) %&gt;%
+  drop_na() %&gt;%
+  mutate(Place = gsub(&quot;\\([a-z]\\)&quot;,&quot;&quot;,Place)) %&gt;%
+  filter(!grepl(&quot;Total&quot;, Place))
+
+knitr::kable(response_counts)</code></pre>
+<table style="width:100%;">
+<colgroup>
+<col width="9%"/>
+<col width="2%"/>
+<col width="5%"/>
+<col width="2%"/>
+<col width="4%"/>
+<col width="5%"/>
+<col width="8%"/>
+<col width="5%"/>
+<col width="8%"/>
+<col width="7%"/>
+<col width="11%"/>
+<col width="5%"/>
+<col width="8%"/>
+<col width="5%"/>
+<col width="8%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Place</th>
+<th align="right">Yes</th>
+<th align="right">Yes_percentage</th>
+<th align="right">No</th>
+<th align="right">No_percentage</th>
+<th align="right">Total_Response</th>
+<th align="right">Total_Response_percentage</th>
+<th align="right">Response_clear</th>
+<th align="right">Response_clear_percentage</th>
+<th align="right">Response_not_clear(b)</th>
+<th align="right">Response_not_clear(b)_percentage</th>
+<th align="right">Non-responding</th>
+<th align="right">Non-responding_percentage</th>
+<th align="right">Eligible_Total</th>
+<th align="right">Eligible_Total_percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">New South Wales</td>
+<td align="right">2374362</td>
+<td align="right">57.8</td>
+<td align="right">1736838</td>
+<td align="right">42.2</td>
+<td align="right">4111200</td>
+<td align="right">100</td>
+<td align="right">4111200</td>
+<td align="right">79.2</td>
+<td align="right">11036</td>
+<td align="right">0.2</td>
+<td align="right">1065445</td>
+<td align="right">20.5</td>
+<td align="right">5187681</td>
+<td align="right">100</td>
+</tr>
+<tr class="even">
+<td align="left">Victoria</td>
+<td align="right">2145629</td>
+<td align="right">64.9</td>
+<td align="right">1161098</td>
+<td align="right">35.1</td>
+<td align="right">3306727</td>
+<td align="right">100</td>
+<td align="right">3306727</td>
+<td align="right">81.4</td>
+<td align="right">11028</td>
+<td align="right">0.3</td>
+<td align="right">743634</td>
+<td align="right">18.3</td>
+<td align="right">4061389</td>
+<td align="right">100</td>
+</tr>
+<tr class="odd">
+<td align="left">Queensland</td>
+<td align="right">1487060</td>
+<td align="right">60.7</td>
+<td align="right">961015</td>
+<td align="right">39.3</td>
+<td align="right">2448075</td>
+<td align="right">100</td>
+<td align="right">2448075</td>
+<td align="right">77.7</td>
+<td align="right">7088</td>
+<td align="right">0.2</td>
+<td align="right">695710</td>
+<td align="right">22.1</td>
+<td align="right">3150873</td>
+<td align="right">100</td>
+</tr>
+<tr class="even">
+<td align="left">South Australia</td>
+<td align="right">592528</td>
+<td align="right">62.5</td>
+<td align="right">356247</td>
+<td align="right">37.5</td>
+<td align="right">948775</td>
+<td align="right">100</td>
+<td align="right">948775</td>
+<td align="right">79.5</td>
+<td align="right">2778</td>
+<td align="right">0.2</td>
+<td align="right">242027</td>
+<td align="right">20.3</td>
+<td align="right">1193580</td>
+<td align="right">100</td>
+</tr>
+<tr class="odd">
+<td align="left">Western Australia</td>
+<td align="right">801575</td>
+<td align="right">63.7</td>
+<td align="right">455924</td>
+<td align="right">36.3</td>
+<td align="right">1257499</td>
+<td align="right">100</td>
+<td align="right">1257499</td>
+<td align="right">78.3</td>
+<td align="right">3188</td>
+<td align="right">0.2</td>
+<td align="right">346333</td>
+<td align="right">21.6</td>
+<td align="right">1607020</td>
+<td align="right">100</td>
+</tr>
+<tr class="even">
+<td align="left">Tasmania</td>
+<td align="right">191948</td>
+<td align="right">63.6</td>
+<td align="right">109655</td>
+<td align="right">36.4</td>
+<td align="right">301603</td>
+<td align="right">100</td>
+<td align="right">301603</td>
+<td align="right">79.5</td>
+<td align="right">805</td>
+<td align="right">0.2</td>
+<td align="right">77020</td>
+<td align="right">20.3</td>
+<td align="right">379428</td>
+<td align="right">100</td>
+</tr>
+<tr class="odd">
+<td align="left">Northern Territory</td>
+<td align="right">48686</td>
+<td align="right">60.6</td>
+<td align="right">31690</td>
+<td align="right">39.4</td>
+<td align="right">80376</td>
+<td align="right">100</td>
+<td align="right">80376</td>
+<td align="right">58.2</td>
+<td align="right">229</td>
+<td align="right">0.2</td>
+<td align="right">57496</td>
+<td align="right">41.6</td>
+<td align="right">138101</td>
+<td align="right">100</td>
+</tr>
+<tr class="even">
+<td align="left">Australian Capital Territory</td>
+<td align="right">175459</td>
+<td align="right">74.0</td>
+<td align="right">61520</td>
+<td align="right">26.0</td>
+<td align="right">236979</td>
+<td align="right">100</td>
+<td align="right">236979</td>
+<td align="right">82.3</td>
+<td align="right">534</td>
+<td align="right">0.2</td>
+<td align="right">50595</td>
+<td align="right">17.6</td>
+<td align="right">288108</td>
+<td align="right">100</td>
+</tr>
+<tr class="odd">
+<td align="left">Australia</td>
+<td align="right">7817247</td>
+<td align="right">61.6</td>
+<td align="right">4873987</td>
+<td align="right">38.4</td>
+<td align="right">12691234</td>
+<td align="right">100</td>
+<td align="right">12691234</td>
+<td align="right">79.3</td>
+<td align="right">36686</td>
+<td align="right">0.2</td>
+<td align="right">3278260</td>
+<td align="right">20.5</td>
+<td align="right">16006180</td>
+<td align="right">100</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why is the data now tidy?</strong></p>
+<p>The data is now tidy because The titles of the columns are rightfully assigned. There is no extra text or footnotes in the data. The column and row titles are clearly defined. The empty column in between the data is gone so it looks like one whole dataset together. The merged cells have been split to reflect the needed titles of the data. I also got rid of the lower case letter using the mutate function. Lastly I only kept the rows that showed survey values for each Place, so there is only valuable data in the dataset.</p>
+<pre class="r"><code>library(ggplot2)
+ggplot(response_counts, aes(x=No, y=Yes)) + geom_point() + geom_smooth()</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="javascript://" width="672"/> <strong>Line Graph GGPLOT</strong></p>
+<p>This plot show a line graph in the a direct relationship between the number of yes and no responses. The pattern in this plot is as the Yes votes increase, so do the No votes. It is meaningful because it shows that there was an increasing number of votes casted for both choices.</p>
+<pre class="r"><code>#install.packages(&quot;ggplot2&quot;)
+
+library(ggplot2)
+bar = ggplot(response_counts, mapping = 
+               aes(x =No, y =Yes)) + geom_boxplot() + coord_flip()
+bar</code></pre>
+<pre><code>## Warning: Continuous x aesthetic -- did you forget aes(group=...)?</code></pre>
+<p><img src="javascript://" width="672"/> <strong>Bar Graph GGPLOT</strong></p>
+<p>This plot shows a bar chart for the repondant’s answers. The pattern in this plot shows that slighty more people voted ‘Yes’ than ‘No’. It is meaningful because it shows that the deviation of the ‘Yes’ votes from the No votes is prevalent but not significant.</p>
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/d2l/common/math/MathML.js?v=20.21.4.28830 "></script><script type="text/javascript">document.addEventListener('DOMContentLoaded', function() { D2LMathML.DesktopInit('https://s.brightspace.com/lib/mathjax/2.7.4/MathJax.js?config=MML_HTMLorMML','https://s.brightspace.com/lib/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML','130',false); });</script></body></html>
