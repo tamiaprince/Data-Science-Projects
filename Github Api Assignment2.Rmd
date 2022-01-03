@@ -1,0 +1,242 @@
+---
+title: "Assignment2 - "
+author: ""
+date: "07/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,message=FALSE, warning=FALSE}
+library(tidyverse)
+library(repurrrsive)
+library(plyr)
+library(dplyr)
+library(httr)
+library(gh)
+library(ggplot2)
+library(knitr)
+library(jsonlite)
+library(doParallel)
+library(foreach)
+library(lubridate)
+library(rjson)
+```
+### Git user with Repositories
+```{r}
+gituser <- gh("/users/benjamincrom")
+repos <- gh("/users/benjamincrom/repos", .limit = Inf)
+```
+### Adding token
+```{r}
+git_token <-"a7462569ef40ef24d6ebbf2ae34c1f26cbe7f75f"
+Sys.setenv(github_token =git_token)
+
+```
+### Extracting Repositories
+```
+Setting working directory for repos
+```
+```{r}
+mainDir <-getwd()
+reposubdir<- "repos"
+dir.create(file.path(mainDir,reposubdir),showWarnings = FALSE)
+repopath<-paste(mainDir,"/",reposubdir,sep="")
+setwd(repopath)
+
+for (i in 1:length(repos)) {
+  jsonContent = toJSON(repos[[i]])
+  write(jsonContent, file=paste("repopath",i,".json",sep = ""))
+}
+setwd(mainDir)
+```
+```
+Create data frame for repos
+```
+```{r,message=FALSE, warning=FALSE}
+setwd(repopath)
+
+filenames <- list.files(pattern="*.json", full.names=TRUE)
+repos_list <- lapply(filenames, function(x) rjson::fromJSON(file=x))
+length(repos_list)
+repos_df_final <- data.frame(do.call(rbind, repos_list))
+setwd(mainDir)
+```
+
+
+### Extracting Followers
+
+```
+Setting working directory for followers
+```
+```{r}
+mainDir <-getwd()
+followersubdir<- "followers"
+dir.create(file.path(mainDir,followersubdir),showWarnings = FALSE)
+followerpath<-paste(mainDir,"/",followersubdir,sep="")
+setwd(followerpath)
+followers <- gh("/users/benjamincrom/followers", .limit = Inf)
+for (i in 1:length(followers)) {
+  jsonContent = toJSON(followers[[i]])
+  write(jsonContent, file=paste("followers",i,".json",sep = ""))
+}
+setwd(mainDir)
+
+```
+```
+Create data frame for followers
+```
+```{r,message=FALSE, warning=FALSE}
+setwd(followerpath)
+
+filenames <- list.files(pattern="*.json", full.names=TRUE) 
+followers_list <- lapply(filenames, function(x) rjson::fromJSON(file=x))
+length(followers_list)
+followers_df <- data.frame(do.call(rbind, followers_list))
+setwd(mainDir)
+```
+
+### Extracting Issues
+```
+Setting working directory for issues
+```
+```{r}
+mainDir <-getwd()
+issuesdir<- "issues"
+dir.create(file.path(mainDir,issuesdir),showWarnings = FALSE)
+issuespath<-paste(mainDir,"/",issuesdir,sep="")
+setwd(issuespath)
+
+for(i in 1:length(repos)){
+  if (repos[[i]]$open_issues_count > 0){
+    write(toJSON(gh("/repos/:owner/:repo/issues",
+                    owner = 'benjamincrom',
+                    issue= 'all',
+                    state= 'all',
+                    repo = repos[[i]]$name,
+                    .token = git_token) 
+                 # pretty = TRUE
+                 ),
+          file.path(issuespath, 
+                    paste("repos",i,".json",sep="")))
+  }
+}
+setwd(mainDir)
+```
+
+```
+Create data frame for issues
+```
+```{r,message=FALSE, warning=FALSE}
+setwd(issuespath)
+filenames <- list.files(pattern="*.json", full.names=TRUE) 
+issues_list <- lapply(filenames, function(x) rjson::fromJSON(file=x))
+length(issues_list)
+setwd(mainDir)
+```
+
+```{r,message=FALSE, warning=FALSE}
+issue_list1 <- unlist(issues_list, recursive = F, use.names = T)
+issue_df <- data.frame(do.call(rbind, issue_list1))
+# head(issue_df)
+```
+### User Details
+```{r}
+user_df <- tibble(   user_id = gituser$id, 
+                     user_name = gituser$name,
+                     repos = gituser$public_repos,
+                     followers = gituser$followers)
+kable(user_df)
+
+```
+
+
+### Follower Details
+
+```{r}
+kf <- gh("/users/benjamincrom/followers", .limit = Inf)
+  
+# followers 
+  df_followers <- map_df(
+    kf[1:5], magrittr::extract, names(kf[[5]])
+  )
+df_followers
+
+
+```
+
+```{r}
+followers_details = 
+  map(df_followers$login, ~gh(paste0("/users/", .)))
+head(followers_details,1)
+
+for(i in 1:length(followers_details)) {
+  if (is.null(followers_details[[i]]$name)){
+    followers_details[[i]]$name <- " "
+  }
+}
+```
+```{r}
+d<- map_df(
+  followers_details, magrittr::extract, c("id","name","public_repos","followers")
+)
+kable(head(d,5))
+
+```
+
+### Repository Details
+
+
+```{r}
+
+repos_table_final <- repos_df_final %>%
+  select(name, language, size, forks_count, stargazers_count, watchers_count, open_issues_count)
+kable(head(repos_table_final))
+
+```
+
+### Issue Details
+
+```{r}
+issues_list <- merge(x = issue_df, y = repos_df_final, by.y="url",by.x="repository_url",all.x = TRUE,sort=F)
+
+issue_table = issues_list %>%
+   select(name,open_issues_count,created_at.y,updated_at.y, closed_at) %>%
+   # mutate(c(created_at.y,closed_at), as.POSIXct, format = "%m-%d-%YT%I:%M:%SZ") %>%
+   mutate(closing_duration = difftime(ymd_hms(closed_at), ymd_hms(created_at.y))) %>%
+   select(name,open_issues_count,closing_duration)
+   
+   # select(name,open_issues_count,created_at.y,updated_at.y, closed_at) %>%
+   # mutate(issue_created_at = created_at.y,issue_updated_at = updated_at.y) %>%
+   # select(name,open_issues_count,issue_created_at,issue_updated_at, closed_at)
+
+kable(head(issue_table))
+
+```
+### Issues per Repository
+```{r}
+
+rdf1 <- repos_df_final %>% 
+  filter(as.numeric(open_issues_count) > 0)
+
+plot1 <- ggplot(rdf1, aes(x="", y=as.numeric(open_issues_count), fill = as.character(name))) +
+  geom_bar(stat = "identity", width = 1) + coord_polar("y", start=0) +
+  labs(fill="Repository Name", 
+       x=NULL, 
+       y=NULL, 
+       title="Pie Chart of Open issues per Repository")
+plot(plot1)
+``` 
+### Plot showing programming language
+```{r}
+plot2<-ggplot(repos_table_final, aes(x = as.character(language),y = forks_count))+
+  geom_col(fill="red")+
+  geom_bar(stat="identity")+
+  labs(title="Languages used in repos",
+       x="Language",
+       y="Fork Count")
+plot(plot2)
+
+```
